@@ -2,8 +2,8 @@
 
 An simple .mps MIPLIB converter to other formats. 
 
-Currently supports conversion to minizinc format of MIPLIB mps files of type BP
-and IP with integer coefficients. This converter is pre-alpha and works only under certain assumptions. 
+Currently supports conversion to minizinc and LP format of MIPLIB mps files of type BP
+and IP with integer coefficients. This converter is pre-alpha and works only under these assumptions. 
 
 To install download the golang distribution and use *go get*. 
 
@@ -22,77 +22,73 @@ Converted Instances
 
 It has converted successfully the following MIPLIB instances into minizinc: 
 
-* air04.mps
-* ash608gpia-3col.mps
-* eil33-2.mps
-* eilA101-2.mps
-* eilB101.mps
-* ex1010-pi.mps
-* ex10.mps
-* ex9.mps
-* f2000.mps
-* go19.mps
-* hanoi5.mps
-* iis-100-0-cov.mps
-* iis-bupa-cov.mps
-* iis-pima-cov.mps
-* m100n500k4r1.mps
-* macrophage.mps
-* methanosarcina.mps
-* mine-166-5.mps
-* mine-90-10.mps
-* neos-1109824.mps
-* neos-1337307.mps
-* neos-1440225.mps
-* neos-1616732.mps
-* neos-1620770.mps
-* neos18.mps
-* neos-631710.mps
-* neos-777800.mps
-* neos-785912.mps
-* neos-807456.mps
-* neos-820146.mps
-* neos-820157.mps
-* neos-849702.mps
-* neos858960.mps
-* neos-952987.mps
-* neos-957389.mps
-* opm2-z10-s2.mps
-* opm2-z11-s8.mps
-* opm2-z12-s14.mps
-* opm2-z12-s7.mps
-* opm2-z7-s2.mps
-* p6b.mps
-* queens-30.mps
-* rail01.mps
-* ramos3.mps
-* reblock166.mps
-* reblock354.mps
-* reblock420.mps
-* reblock67.mps
-* seymour.mps
-* stp3d.mps
-* sts405.mps
-* sts729.mps
-* t1717.mps
-* t1722.mps
-* tanglegram1.mps
-* tanglegram2.mps
-* toll-like.mps
-* vpphard.mps
-* 30n20b8.mps
-* d10200.mps
-* d20200.mps
-* lectsched-1.mps
-* lectsched-1-obj.mps
-* lectsched-2.mps
-* lectsched-3.mps
-* lectsched-4-obj.mps
-* neos16.mps
-* neos-686190.mps
-* ns1854840.mps
-* rococoB10-011000.mps
-* rococoC10-001000.mps
-* rococoC11-011100.mps
-* rococoC12-111000.mps
-
+* 30n20b8
+* air04
+* ash608gpia-3col
+* d10200
+* d20200
+* enlight13
+* enlight14
+* enlight15
+* enlight16
+* enlight9
+* ex10
+* ex1010-pi
+* ex9
+* f2000
+* go19
+* hanoi5
+* iis-100-0-cov
+* iis-bupa-cov
+* iis-pima-cov
+* lectsched-1
+* lectsched-1-obj
+* lectsched-2
+* lectsched-3
+* lectsched-4-obj
+* m100n500k4r1
+* macrophage
+* methanosarcina
+* neos-1109824
+* neos-1337307
+* neos-1440225
+* neos16
+* neos-1616732
+* neos-1620770
+* neos18
+* neos-631710
+* neos-686190
+* neos-777800
+* neos-785912
+* neos-807456
+* neos-820146
+* neos-820157
+* neos-849702
+* neos858960
+* ns1854840
+* ns1952667
+* nu120-pr3
+* nu60-pr9
+* opm2-z10-s2
+* opm2-z11-s8
+* opm2-z12-s14
+* opm2-z12-s7
+* opm2-z7-s2
+* p6b
+* pw-myciel4
+* queens-30
+* ramos3
+* rococoB10-011000
+* rococoC10-001000
+* rococoC11-011100
+* rococoC12-111000
+* seymour
+* sts405
+* sts729
+* t1717
+* t1722
+* tanglegram1
+* tanglegram2
+* toll-like
+* tw-myciel4
+* vpphard

@@ -14,6 +14,7 @@ import (
 var ver = flag.Bool("ver", false, "Show version info.")
 var filename = flag.String("f", "", "Path of the file.")
 var gringo = flag.Bool("gringo", false, "Ouput in Potasscos Gringo Format.")
+var lp = flag.Bool("lp", false, "Ouput in LP Format (Gurobi/CPlex).")
 var minizinc = flag.Bool("minizinc", true, "Ouput in Minizinc Format.")
 var maxDom = int64(1000)
 
@@ -26,7 +27,7 @@ func main() {
 	var err error
 
 	if *ver {
-		fmt.Println(`MIPLIB .mps converter: Tag 0.1
+		fmt.Println(`MIPLIB .mps converter: Tag 0.2
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
@@ -48,11 +49,14 @@ There is NO WARRANTY, to the extent permitted by law.`)
 			return
 		}
 
-		if *minizinc {
-			PrintMinizinc(pbs, vars)
-		} else if *gringo {
+		if *gringo {
 			PrintGringo(pbs, vars)
+		} else if *lp {
+			PrintLP(pbs, vars)
+		} else if *minizinc {
+			PrintMinizinc(pbs, vars)
 		}
+
 	} else {
 		os.Exit(100)
 	}
@@ -191,6 +195,118 @@ func PrintMinizinc(pbs []Linear, vars map[string]Bound) {
 	//fmt.Println("];")
 }
 
+func PrintEntries(entries []Entry) {
+	if len(entries) > 0 {
+
+		for i, e := range entries {
+			if i == 0 {
+				if e.Weight > 0 {
+					if e.Weight == 1 {
+						fmt.Print(e.id)
+					} else {
+						fmt.Print(e.Weight, " ", e.id)
+					}
+				} else {
+					fmt.Print(e.Weight, " ", e.id)
+				}
+			} else {
+				if e.Weight > 0 {
+					if e.Weight == 1 {
+						fmt.Print(" + ", e.id)
+					} else {
+						fmt.Print(" + ", e.Weight, " ", e.id)
+					}
+				} else {
+					if e.Weight == -1 {
+						fmt.Print(" - ", e.id)
+					} else {
+						fmt.Print(" - ", -e.Weight, " ", e.id)
+					}
+				}
+			}
+		}
+	}
+}
+
+func PrintLP(pbs []Linear, vars map[string]Bound) {
+
+	// find optimization
+	fmt.Println("Minimize")
+	for _, t := range pbs {
+		if t.Typ == OPT {
+			PrintEntries(t.Entries)
+			fmt.Println()
+			break
+		}
+	}
+
+	// iterate over the others
+	fmt.Println("Subject To")
+	for _, t := range pbs {
+		if t.Typ == OPT {
+			continue
+		}
+		PrintEntries(t.Entries)
+
+		switch t.Typ {
+		case LE:
+			fmt.Print(" <= ", t.K, "\n")
+		case GE:
+			fmt.Print(" >= ", t.K, "\n")
+		case EQ:
+			fmt.Print(" = ", t.K, "\n")
+		}
+	}
+
+	// Bounds
+	fmt.Println("Bounds")
+
+	for x, b := range vars {
+		if b.lb != 0 || b.ub != 1 {
+			if b.ub == math.MaxInt32 {
+				fmt.Println(b.lb, " <= ", x)
+			} else {
+				fmt.Println(b.lb, " <= ", x, "<=", b.ub)
+			}
+		}
+	}
+
+	fmt.Println("Generals")
+	c := 0
+
+	for x, b := range vars {
+		if b.lb != 0 || b.ub != 1 {
+			fmt.Print(x, " ")
+			c++
+			if c == 10 {
+				c = 0
+				fmt.Println()
+			}
+		}
+	}
+	if c != 0 {
+		c = 0
+		fmt.Println()
+	}
+
+	fmt.Println("Binary")
+
+	for x, b := range vars {
+		if b.lb == 0 && b.ub == 1 {
+			fmt.Print(x, " ")
+			c++
+			if c == 10 {
+				c = 0
+				fmt.Println()
+			}
+		}
+	}
+	if c != 0 {
+		c = 0
+		fmt.Println()
+	}
+}
+
 func PrintGringo(pbs []Linear, vars map[string]Bound) {
 
 	fmt.Println("#hide.")
@@ -323,7 +439,7 @@ func ParseMPS(f string) (pbs []Linear, vars map[string]Bound, err error) {
 				rowMap[row] = len(pbs) - 1
 			}
 		case 3: // COLUMNS
-			if entries[0] == "INT1" || entries[0] == "INT1END" || entries[0] == "INTEND" ||
+			if entries[0] == "INTM" || entries[0] == "INT1" || entries[0] == "INT1END" || entries[0] == "INTEND" ||
 				entries[0] == "INTSTART" || strings.HasPrefix(entries[0], "MARK") {
 				// do nothing
 				state = 3
@@ -334,7 +450,7 @@ func ParseMPS(f string) (pbs []Linear, vars map[string]Bound, err error) {
 				v := reformatIdentifier(entries[0])
 
 				if _, ok := vars[v]; !ok {
-					vars[v] = Bound{0, math.MaxInt64}
+					vars[v] = Bound{0, math.MaxInt32}
 				}
 
 				row := reformatIdentifier(entries[1])
@@ -406,6 +522,7 @@ func ParseMPS(f string) (pbs []Linear, vars map[string]Bound, err error) {
 				}
 
 				//LO    lower bound        b <= x
+				//LI    integer variable   b <= x (< +inf)
 				//UP    upper bound        x <= b
 				//FX    fixed variable     x = b
 				//FR    free variable
@@ -436,7 +553,7 @@ func ParseMPS(f string) (pbs []Linear, vars map[string]Bound, err error) {
 						return
 					}
 					b = Bound{value, value}
-				} else if strings.HasPrefix(entries[0], "LO") {
+				} else if strings.HasPrefix(entries[0], "LO") || strings.HasPrefix(entries[0], "LI") {
 					value, err2 := strconv.ParseInt(entries[3], 10, 64)
 					if err2 != nil {
 						fmt.Println("Problem in line", i, ":", l)
