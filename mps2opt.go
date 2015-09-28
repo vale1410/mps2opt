@@ -305,6 +305,7 @@ func PrintLP(pbs []Linear, vars map[string]Bound) {
 		c = 0
 		fmt.Println()
 	}
+	fmt.Println("End")
 }
 
 func PrintGringo(pbs []Linear, vars map[string]Bound) {
