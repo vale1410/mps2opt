@@ -27,7 +27,7 @@ func main() {
 	var err error
 
 	if *ver {
-		fmt.Println(`MIPLIB .mps converter: Tag 0.2
+		fmt.Println(`MIPLIB .mps converter: Tag 0.3
 Copyright (C) Data61 and Valentin Mayer-Eichberger
 License GPLv2+: GNU GPL version 2 or later <http://gnu.org/licenses/gpl.html>
 There is NO WARRANTY, to the extent permitted by law.`)
